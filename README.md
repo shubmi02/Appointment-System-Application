@@ -3,6 +3,6 @@
 source venv/bin/activate
 ```
 2. Run this command
-````
+```
 flash run --debug
 ```
