@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When2Meet Clone</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 100px); /* 6 columns for days */
+            grid-gap: 5px;
+        }
+
+        .grid div {
+            width: 100px;
+            height: 50px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+        }
+
+        .grid div.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .day-label, .time-label {
+            font-weight: bold;
+        }
+
+        .time-label {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <h1>When2Meet Clone</h1>
+    <div class="container">
+        <div class="grid">
+            <!-- Days -->
+            <div class="day-label"></div>
+            <div class="day-label">Monday</div>
+            <div class="day-label">Tuesday</div>
+            <div class="day-label">Wednesday</div>
+            <div class="day-label">Thursday</div>
+            <div class="day-label">Friday</div>
+            
+            <!-- Time Slots -->
+            <!-- 9AM Slot -->
+            <div class="time-label">9:00 AM</div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            
+            <!-- 10AM Slot -->
+            <div class="time-label">10:00 AM</div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            
+            <!-- 11AM Slot -->
+            <div class="time-label">11:00 AM</div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            
+            <!-- 12PM Slot -->
+            <div class="time-label">12:00 PM</div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            
+            <!-- 1PM Slot -->
+            <div class="time-label">1:00 PM</div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+            <div onclick="toggleSlot(this)"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSlot(element) {
+            // Toggle the 'selected' class on click
+            element.classList.toggle('selected');
+        }
+    </script>
+</body>
+</html>

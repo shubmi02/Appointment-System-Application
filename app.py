@@ -13,6 +13,8 @@ class User(db.Model):
     name = db.Column(db.String(200), nullable = False)
     email = db.Column(db.String(200), nullable = False, unique = True)
     password = db.Column(db.String(100))
+    availabilities = db.relationship('Availability', backref='user', lazy=True)
+
     def __init__(self, email, password, name):  
         self.name = name
         self.email = email
@@ -24,12 +26,22 @@ class User(db.Model):
 def __repr__(self):
         return f"Name: {self.name}, ID: {self.id}, Role: {self.role}"
 
+class Availability(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    day_of_week = db.Column(db.String(20), nullable=False)
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+
+    def __repr__(self):
+        return f"<Availability {self.day_of_week} {self.start_time}-{self.end_time} for user {self.user_id}>"
+
 with app.app_context():
     db.create_all()
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return render_template('homepage.html')
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
