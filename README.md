@@ -2,7 +2,11 @@
 ```
 source venv/bin/activate
 ```
-2. Run this command
+2. Install dependencies
+```
+pip install -r requirements.txt
+```
+3. Run this command
 ```
 flash run --debug
 ```
