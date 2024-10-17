@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -13,7 +14,6 @@ class User(db.Model):
     name = db.Column(db.String(200), nullable = False)
     email = db.Column(db.String(200), nullable = False, unique = True)
     password = db.Column(db.String(100))
-    availabilities = db.relationship('Availability', backref='user', lazy=True)
 
     def __init__(self, email, password, name):  
         self.name = name
@@ -26,22 +26,49 @@ class User(db.Model):
 def __repr__(self):
         return f"Name: {self.name}, ID: {self.id}, Role: {self.role}"
 
-class Availability(db.Model):
+class Room(db.Model):
+    __tablename__ = 'rooms'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    day_of_week = db.Column(db.String(20), nullable=False)
-    start_time = db.Column(db.Time, nullable=False)
-    end_time = db.Column(db.Time, nullable=False)
+    name = db.Column(db.String, nullable=False)
+    time_slot = db.Column(db.String, nullable=False)
+    available = db.Column(db.Boolean, default=True)
 
-    def __repr__(self):
-        return f"<Availability {self.day_of_week} {self.start_time}-{self.end_time} for user {self.user_id}>"
+def load_data():
+    df = pd.read_csv('room_availability.csv')
+    
+    for index, row in df.iterrows():
+        room_name = row['Room']
+        capacity = row['Capacity']  
+        for time_slot in df.columns[2:]:  
+            available = row[time_slot]  
+            room = Room(name=room_name, time_slot=time_slot, available=available)
+            db.session.add(room)
+    
+    db.session.commit()
+
 
 with app.app_context():
     db.create_all()
+    if not Room.query.first():  
+        load_data()
+
+
 
 @app.route("/")
-def hello_world():
-    return render_template('homepage.html')
+def homepage():
+    rooms = Room.query.all()  # Fetch all rooms and their availability from the database
+    
+    # Get unique room names, ordered by room name
+    room_names = sorted(list(set(room.name for room in rooms)))
+    
+    # Organize room data by time slot and room
+    room_availability = {}
+    for room in rooms:
+        if room.time_slot not in room_availability:
+            room_availability[room.time_slot] = {}
+        room_availability[room.time_slot][room.name] = room.available
+    
+    return render_template('homepage.html', room_names=room_names, room_availability=room_availability)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():

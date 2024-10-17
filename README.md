@@ -10,3 +10,8 @@ pip install -r requirements.txt
 ```
 flash run --debug
 ```
+4. Knowing if your venv is active (if blank, venv is inactive.)
+```
+echo $VIRTUAL_ENV
+```
+
