@@ -40,18 +40,89 @@
         .time-label {
             font-weight: bold;
         }
+        .select2-container .select2-selection--single {
+            width: 100px; /* Adjust width */
+            height: 40px; /* Optional: Adjust height */
+        }
+        .select2-container .select2-dropdown {
+            margin: 20px auto;
+            width: 100px !important; /* Match dropdown width */
+        }
+        
     </style>
+        <!-- Include Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <!-- Include jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Include Select2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
     <h1>Room Availability</h1>
     <!-- Filter Form -->
-    <form method="GET" action="/">
+
+    <form method="GET" action="/" onsubmit="return validateTime();">
         <label for="start_time">Start Time:</label>
-        <input type="time" id="start_time" name="start_time" required>
+        <select id="start_time" name="start_time" required>
+            <option value="08:00">08:00 AM</option>
+            <option value="09:00">09:00 AM</option>
+            <option value="10:00">10:00 AM</option>
+            <option value="11:00">11:00 AM</option>
+            <option value="12:00">12:00 PM</option>
+            <option value="13:00">13:00 PM</option>
+            <option value="14:00">14:00 PM</option>
+            <option value="15:00">15:00 PM</option>
+            <option value="16:00">16:00 PM</option>
+            <option value="17:00">17:00 PM</option>
+            <option value="18:00">18:00 PM</option>
+            <option value="19:00">19:00 PM</option>
+            <option value="20:00">20:00 PM</option>
+            <option value="21:00">21:00 PM</option>
+        </select>
+    
         <label for="end_time">End Time:</label>
-        <input type="time" id="end_time" name="end_time" required>
+        <select id="end_time" name="end_time" required>
+            <option value="08:00">08:00 AM</option>
+            <option value="09:00">09:00 AM</option>
+            <option value="10:00">10:00 AM</option>
+            <option value="11:00">11:00 AM</option>
+            <option value="12:00">12:00 PM</option>
+            <option value="13:00">13:00 PM</option>
+            <option value="14:00">14:00 PM</option>
+            <option value="15:00">15:00 PM</option>
+            <option value="16:00">16:00 PM</option>
+            <option value="17:00">17:00 PM</option>
+            <option value="18:00">18:00 PM</option>
+            <option value="19:00">19:00 PM</option>
+            <option value="20:00">20:00 PM</option>
+            <option value="21:00">21:00 PM</option>
+        </select>
+    
         <button type="submit">Filter</button>
     </form>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('#start_time').select2();
+            $('#end_time').select2();
+        });
+    
+        function validateTime() {
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+    
+            const startHour = parseInt(startTime.split(':')[0], 10);
+            const endHour = parseInt(endTime.split(':')[0], 10);
+    
+            if (startHour < 8 || startHour > 20 || endHour < 8 || endHour > 20) {
+                alert('Please select a time between 08:00 AM and 08:00 PM.');
+                return false;
+            }
+    
+            return true;
+        }
+    </script>
     <table>
         <!-- Header Row: Room Numbers -->
         <tr>
