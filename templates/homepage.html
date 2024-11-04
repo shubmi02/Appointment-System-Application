@@ -44,6 +44,14 @@
 </head>
 <body>
     <h1>Room Availability</h1>
+    <!-- Filter Form -->
+    <form method="GET" action="/">
+        <label for="start_time">Start Time:</label>
+        <input type="time" id="start_time" name="start_time" required>
+        <label for="end_time">End Time:</label>
+        <input type="time" id="end_time" name="end_time" required>
+        <button type="submit">Filter</button>
+    </form>
     <table>
         <!-- Header Row: Room Numbers -->
         <tr>

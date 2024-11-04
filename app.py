@@ -56,7 +56,17 @@ with app.app_context():
 
 @app.route("/")
 def homepage():
-    rooms = Room.query.all()  # Fetch all rooms and their availability from the database
+    #Filters start and end times.
+    start_time = request.args.get('start_time')
+    end_time = request.args.get('end_time')
+    
+    query = Room.query
+    
+    if start_time and end_time:
+        query = query.filter(Room.time_slot >= start_time, Room.time_slot <= end_time)
+    rooms = query.all()
+
+    #rooms = Room.query.all()  # Fetch all rooms and their availability from the database
     
     # Get unique room names, ordered by room name
     room_names = sorted(list(set(room.name for room in rooms)))
