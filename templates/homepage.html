@@ -59,7 +59,9 @@
                 <td class="time-label">{{ time_slot }}</td> <!-- Time Slot Column -->
                 {% for room_name in room_names %}
                     <td class="{% if rooms.get(room_name) %}available{% else %}unavailable{% endif %}">
-                        {% if rooms.get(room_name) %}Available{% else %}Unavailable{% endif %}
+                        {% if rooms.get(room_name) %}
+                        <input type="checkbox" name="booking" value="{{ room_name }}_{{ time_slot }}"> Available
+                        {% else %}Unavailable{% endif %}
                     </td>
                 {% endfor %}
             </tr>
@@ -68,8 +70,8 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-sm-6 mt-4">
-                <form action="confirmation.html" method="POST">
-                    <button onclick="location.href = 'confirmation.html';" id="confButton" class="float-left submit-button">Confirm Room</button>
+                <form action="confirmation" method="POST">
+                    <button onclick="location.href = 'confirmation';" id="confButton" class="float-left submit-button">Confirm Room</button>
                 </form>
             </div>
         </div>

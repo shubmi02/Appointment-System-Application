@@ -10,10 +10,11 @@ db = SQLAlchemy(app)
 app.secret_key = 'secret_key'
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     name = db.Column(db.String(200), nullable = False)
     email = db.Column(db.String(200), nullable = False, unique = True)
     password = db.Column(db.String(100))
+    room_id = db.Column(db.Integer)
 
     def __init__(self, email, password, name):  
         self.name = name
@@ -54,19 +55,22 @@ with app.app_context():
 
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def homepage():
-    rooms = Room.query.all()
+    if 'logged_in' in session:
+        rooms = Room.query.all()
     
-    room_names = sorted(list(set(room.name for room in rooms)))
+        room_names = sorted(list(set(room.name for room in rooms)))
     
-    room_availability = {}
-    for room in rooms:
-        if room.time_slot not in room_availability:
-            room_availability[room.time_slot] = {}
-        room_availability[room.time_slot][room.name] = room.available
+        room_availability = {}
+        for room in rooms:
+            if room.time_slot not in room_availability:
+                room_availability[room.time_slot] = {}
+            room_availability[room.time_slot][room.name] = room.available
     
-    return render_template('homepage.html', room_names=room_names, room_availability=room_availability)
+        return render_template('homepage.html', room_names=room_names, room_availability=room_availability)
+    else:
+        return redirect('/login')
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -92,8 +96,13 @@ def login():
         if user and user.check_password(password):
             session['name'] = user.name
             session['email'] = user.email
+            session['logged_in'] = True
             return redirect('/')
         else:
             return render_template('login.html', error="Invalid username or password")
 
     return render_template('login.html')
+
+@app.route("/confirmation", methods = ['GET', 'POST'])
+def confirmation():
+    return render_template('confirmation.html')
