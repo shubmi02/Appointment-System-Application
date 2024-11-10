@@ -48,33 +48,31 @@
         <!-- Header Row: Room Numbers -->
         <tr>
             <th>Time</th> <!-- Empty cell for time labels -->
-            {% for room in room_names %}
-                <th>Room {{ room }}</th>
+            {% for room_name in room_names %}
+                <th>Room {{ room_name }}</th>
             {% endfor %}
         </tr>
 
         <!-- Data Rows: Time Slots and Availability -->
-        {% for time_slot, room_availabilities in room_availability.items() %}
-        <tr>
-            <td class="time-label">{{ time_slot }}</td> <!-- Time Slot Column -->
-            {% for availability in room_availabilities %}
-                <td class="{% if availability.available %}available{% else %}unavailable{% endif %}">
-                    {% if availability.available %}Available{% else %}Unavailable{% endif %}
-                </td>
-            {% endfor %}
-        </tr>
+        {% for time_slot, rooms in room_availability.items() %}
+            <tr>
+                <td class="time-label">{{ time_slot }}</td> <!-- Time Slot Column -->
+                {% for room_name in room_names %}
+                    <td class="{% if rooms.get(room_name) %}available{% else %}unavailable{% endif %}">
+                        {% if rooms.get(room_name) %}Available{% else %}Unavailable{% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
         {% endfor %}
     </table>
     <div class="container">
-        <div class=" row justify-content-center">
+        <div class="row justify-content-center">
             <div class="col-sm-6 mt-4">
                 <form action="confirmation.html" method="POST">
-                    <button onclick="location.href = 'confirmation.html';" id="confButton" class="float-left submit-button" >Confirm Room</button>
+                    <button onclick="location.href = 'confirmation.html';" id="confButton" class="float-left submit-button">Confirm Room</button>
                 </form>
             </div>
-    
         </div>
-      
     </div>
 </body>
 </html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Availability</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Room Availability</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Time Slot</th>
+                {% for room_name in room_names %}
+                    <th>{{ room_name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for time_slot, rooms in room_availability.items() %}
+                <tr>
+                    <td>{{ time_slot }}</td>
+                    {% for room_name in room_names %}
+                        <td>
+                            {% if rooms.get(room_name) %}
+                                Available
+                            {% else %}
+                                Unavailable
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
