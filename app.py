@@ -56,12 +56,10 @@ with app.app_context():
 
 @app.route("/")
 def homepage():
-    rooms = Room.query.all()  # Fetch all rooms and their availability from the database
+    rooms = Room.query.all()
     
-    # Get unique room names, ordered by room name
     room_names = sorted(list(set(room.name for room in rooms)))
     
-    # Organize room data by time slot and room
     room_availability = {}
     for room in rooms:
         if room.time_slot not in room_availability:
