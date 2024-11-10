@@ -58,7 +58,15 @@ with app.app_context():
 @app.route("/", methods=['GET', 'POST'])
 def homepage():
     if 'logged_in' in session:
-        rooms = Room.query.all()
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
+    
+        query = Room.query
+    
+        if start_time and end_time:
+            query = query.filter(Room.time_slot >= start_time, Room.time_slot <= end_time)
+        rooms = query.all()
+        
     
         room_names = sorted(list(set(room.name for room in rooms)))
     
