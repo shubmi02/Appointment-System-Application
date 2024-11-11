@@ -118,4 +118,6 @@ def confirmation():
         selected_room_ids = request.form.getlist('room_id')
         selected_room_ids = [int(room_id) for room_id in selected_room_ids]
         print(f"Room Selected: {selected_room_ids}")
+        #TODO Figure out if we need another table to store the user rooms booked, or store as string in db and append room database
+        
         return render_template('confirmation.html')
