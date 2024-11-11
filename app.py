@@ -9,12 +9,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 db = SQLAlchemy(app)
 app.secret_key = 'secret_key'
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     name = db.Column(db.String(200), nullable = False)
     email = db.Column(db.String(200), nullable = False, unique = True)
     password = db.Column(db.String(100))
-    room_id = db.Column(db.Integer)
 
     def __init__(self, email, password, name):  
         self.name = name
@@ -74,7 +74,8 @@ def homepage():
         for room in rooms:
             if room.time_slot not in room_availability:
                 room_availability[room.time_slot] = {}
-            room_availability[room.time_slot][room.name] = room.available
+            room_availability[room.time_slot][room.name] = {'available' : room.available,
+                                                            'id' : room.id}
     
         return render_template('homepage.html', room_names=room_names, room_availability=room_availability)
     else:
@@ -111,6 +112,10 @@ def login():
 
     return render_template('login.html')
 
-@app.route("/confirmation", methods = ['GET', 'POST'])
+@app.route("/confirmation", methods = ['POST'])
 def confirmation():
-    return render_template('confirmation.html')
+    if 'logged_in' in session:
+        selected_room_ids = request.form.getlist('room_id')
+        selected_room_ids = [int(room_id) for room_id in selected_room_ids]
+        print(f"Room Selected: {selected_room_ids}")
+        return render_template('confirmation.html')
