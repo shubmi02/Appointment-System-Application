@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
@@ -9,12 +9,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 db = SQLAlchemy(app)
 app.secret_key = 'secret_key'
 
-
+user_rooms = db.Table('user_rooms',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('room_id', db.Integer, db.ForeignKey('rooms.id'), primary_key=True)
+)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     name = db.Column(db.String(200), nullable = False)
     email = db.Column(db.String(200), nullable = False, unique = True)
     password = db.Column(db.String(100))
+    rooms = db.relationship('Room', secondary=user_rooms, backref=db.backref('users', lazy=True))
 
     def __init__(self, email, password, name):  
         self.name = name
@@ -105,6 +109,7 @@ def login():
         if user and user.check_password(password):
             session['name'] = user.name
             session['email'] = user.email
+            session['user_id'] = user.id
             session['logged_in'] = True
             return redirect('/')
         else:
@@ -112,12 +117,31 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    session.pop('user_id', None)  # Remove user_id from session
+    flash('You have been logged out.')
+    return redirect('/login')
+
 @app.route("/confirmation", methods = ['POST'])
 def confirmation():
     if 'logged_in' in session:
         selected_room_ids = request.form.getlist('room_id')
         selected_room_ids = [int(room_id) for room_id in selected_room_ids]
-        print(f"Room Selected: {selected_room_ids}")
-        #TODO Figure out if we need another table to store the user rooms booked, or store as string in db and append room database
-        
+
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+
+        # Fetch the selected rooms and add them to the user's rooms
+        selected_rooms = Room.query.filter(Room.id.in_(selected_room_ids)).all()
+        user.rooms.extend(selected_rooms)
+
+        # Updating room database
+        rooms_to_update = Room.query.filter(Room.id.in_(selected_room_ids)).all()
+        for room in rooms_to_update:
+            room.available = False  
+        db.session.commit()
+
+       
         return render_template('confirmation.html')
