@@ -92,6 +92,11 @@ def register():
         email = request.form['email']
         password = request.form['password']
 
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash("Email already registered. Please log in.", "warning")
+            return redirect('/login')
+
         new_user = User(name = name, email = email, password = generate_password_hash(password))
         db.session.add(new_user)
         db.session.commit()
@@ -99,11 +104,12 @@ def register():
 
     return render_template('register.html')
 
-@app.route("/login", methods = ['GET', 'POST'])
+@app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        
         user = User.query.filter_by(email=email).first()
 
         if user and user.check_password(password):
@@ -111,11 +117,14 @@ def login():
             session['email'] = user.email
             session['user_id'] = user.id
             session['logged_in'] = True
+            
             return redirect('/')
         else:
-            return render_template('login.html', error="Invalid username or password")
+            flash("Invalid username or password", "danger")
+            return redirect(url_for('login'))
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
