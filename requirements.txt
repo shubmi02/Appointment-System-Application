@@ -15,3 +15,5 @@ SQLAlchemy==2.0.35
 typing_extensions==4.12.2
 tzdata==2024.2
 Werkzeug==3.0.4
+Flask-Mail=0.10.0
+Flask-APScheduler=1.13.1
