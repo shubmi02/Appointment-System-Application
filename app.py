@@ -188,7 +188,7 @@ def confirmation():
             #         f'You have successfully booked {room.name} for the time slot {room.time_slot}.'
             #     ]
             # )
-            
+
              # TESTING: Send the email after 30 seconds
             recipient = user.email
             subject = f"Room Booking Confirmation: {room.name}"
@@ -209,3 +209,14 @@ def confirmation():
         flash('You need to log in to book a room.', 'warning')
         return redirect('/login')
         #return render_template('confirmation.html')
+        
+@app.route("/view-dashboard")
+def view_dashboard():
+    if 'logged_in' not in session:
+        return redirect('/login')
+    
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+    bookings = user.rooms  # Assuming the relationship between User and Room is set up
+
+    return render_template("view_dashboard.html", bookings=bookings)
