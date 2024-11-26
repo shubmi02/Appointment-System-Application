@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
+from flask_apscheduler import APScheduler
+from datetime import datetime, timedelta
 import pandas as pd
 
 app = Flask(__name__)
@@ -8,6 +11,25 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 db = SQLAlchemy(app)
 app.secret_key = 'secret_key'
+
+# Mail Configurations
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'easynotes131@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ozpgzwxnteijbkmc'
+
+# Initialize Extensions
+mail = Mail(app)
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+# Email Sending Function
+def send_email(recipient, subject, body):
+    msg = Message(subject, recipients=[recipient], body=body, sender=app.config['MAIL_USERNAME'])
+    with app.app_context():  # Ensure the app context for Flask-Mail
+        mail.send(msg)
 
 user_rooms = db.Table('user_rooms',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
@@ -152,16 +174,38 @@ def confirmation():
             room.available = False  
         db.session.commit()
 
-       
-        return render_template('confirmation.html')
-    
-@app.route("/view-dashboard")
-def view_dashboard():
-    if 'logged_in' not in session:
-        return redirect('/login')
-    
-    user_id = session.get('user_id')
-    user = User.query.get(user_id)
-    bookings = user.rooms  # Assuming the relationship between User and Room is set up
+        # Schedule email notifications for each booked room
+        for room in selected_rooms:
+            # notification_time = datetime.now() + timedelta(minutes=5)  # 5 minutes before room time slot
+            # scheduler.add_job(
+            #     id=f'email_notification_{user_id}_{room.id}',
+            #     func=send_email,
+            #     trigger='date',
+            #     run_date=notification_time,
+            #     args=[
+            #         user.email,
+            #         'Room Booking Confirmation',
+            #         f'You have successfully booked {room.name} for the time slot {room.time_slot}.'
+            #     ]
+            # )
+            
+             # TESTING: Send the email after 30 seconds
+            recipient = user.email
+            subject = f"Room Booking Confirmation: {room.name}"
+            body = f"Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}."
+            send_time = datetime.now() + timedelta(seconds=30)
+            scheduler.add_job(
+                id=f'email_notification_{user_id}_{room.id}',  # Ensure the ID is unique
+                func=send_email,
+                trigger='date',
+                run_date=send_time,
+                args=[recipient, subject, body]
+            )
+            # End
 
-    return render_template("view_dashboard.html", bookings=bookings)
+        flash('Booking confirmed! A notification will be sent shortly.', 'success')
+        return render_template('confirmation.html')
+    else:
+        flash('You need to log in to book a room.', 'warning')
+        return redirect('/login')
+        #return render_template('confirmation.html')
