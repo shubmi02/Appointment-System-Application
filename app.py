@@ -154,3 +154,14 @@ def confirmation():
 
        
         return render_template('confirmation.html')
+    
+@app.route("/view-dashboard")
+def view_dashboard():
+    if 'logged_in' not in session:
+        return redirect('/login')
+    
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+    bookings = user.rooms  # Assuming the relationship between User and Room is set up
+
+    return render_template("view_dashboard.html", bookings=bookings)
