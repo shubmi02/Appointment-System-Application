@@ -176,31 +176,37 @@ def confirmation():
 
         # Schedule email notifications for each booked room
         for room in selected_rooms:
-            # notification_time = datetime.now() + timedelta(minutes=5)  # 5 minutes before room time slot
-            # scheduler.add_job(
-            #     id=f'email_notification_{user_id}_{room.id}',
-            #     func=send_email,
-            #     trigger='date',
-            #     run_date=notification_time,
-            #     args=[
-            #         user.email,
-            #         'Room Booking Confirmation',
-            #         f'You have successfully booked {room.name} for the time slot {room.time_slot}.'
-            #     ]
-            # )
+            room_time = datetime.strptime(room.time_slot, "%H:%M")  # Parse the time slot (assuming "HH:MM" format)
+            today = datetime.now().date()
+            notification_time = datetime.combine(today, room_time.time()) - timedelta(minutes=5)  # 5 minutes before the time slot
+
+            # Ensure the notification is in the future
+            if notification_time > datetime.now():
+                scheduler.add_job(
+                    id=f'email_notification_{user_id}_{room.id}',  # Unique job ID
+                    func=send_email,
+                    trigger='date',
+                    run_date=notification_time,
+                    args=[
+                        user.email,
+                        f'Room Booking Confirmation: {room.name}',
+                        f'Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}.'  # Email body
+                    ]
+                )
+
 
              # TESTING: Send the email after 30 seconds
-            recipient = user.email
-            subject = f"Room Booking Confirmation: {room.name}"
-            body = f"Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}."
-            send_time = datetime.now() + timedelta(seconds=30)
-            scheduler.add_job(
-                id=f'email_notification_{user_id}_{room.id}',  # Ensure the ID is unique
-                func=send_email,
-                trigger='date',
-                run_date=send_time,
-                args=[recipient, subject, body]
-            )
+            # recipient = user.email
+            # subject = f"Room Booking Confirmation: {room.name}"
+            # body = f"Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}."
+            # send_time = datetime.now() + timedelta(seconds=30)
+            # scheduler.add_job(
+            #     id=f'email_notification_{user_id}_{room.id}',  # Ensure the ID is unique
+            #     func=send_email,
+            #     trigger='date',
+            #     run_date=send_time,
+            #     args=[recipient, subject, body]
+            # )
             # End
 
         flash('Booking confirmed! A notification will be sent shortly.', 'success')
@@ -220,3 +226,28 @@ def view_dashboard():
     bookings = user.rooms  # Assuming the relationship between User and Room is set up
 
     return render_template("view_dashboard.html", bookings=bookings)
+@app.route("/remove-appointments", methods=['POST'])
+def remove_appointments():
+    if 'logged_in' in session:
+        selected_appointment_ids = request.form.getlist('appointment_id')  
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+
+        if selected_appointment_ids:
+            selected_appointment_ids = [int(appointment_id) for appointment_id in selected_appointment_ids]
+            selected_appointments = Room.query.filter(Room.id.in_(selected_appointment_ids)).all()
+            
+            for appointment in selected_appointments:
+                if appointment in user.rooms:
+                    user.rooms.remove(appointment)
+                appointment.available = True
+            
+            db.session.commit()
+            flash('Selected appointments have been removed.', 'success')
+        else:
+            flash('No appointments were selected.', 'warning')
+        
+        return redirect('/view-dashboard')
+    else:
+        flash('You need to log in to manage your appointments.', 'warning')
+        return redirect('/login')
