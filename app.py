@@ -272,3 +272,36 @@ def view_dashboard():
     bookings = user.rooms  # Assuming the relationship between User and Room is set up
 
     return render_template("view_dashboard.html", bookings=bookings)
+
+@app.route("/remove-appointments", methods=['POST'])
+def remove_appointments():
+    if 'logged_in' in session:
+        selected_appointment_ids = request.form.getlist('appointment_id')  
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+        if selected_appointment_ids:
+            selected_appointment_ids = [int(appointment_id) for appointment_id in selected_appointment_ids]
+            selected_appointments = Room.query.filter(Room.id.in_(selected_appointment_ids)).all()
+            
+            for appointment in selected_appointments:
+                if appointment in user.rooms:
+                    user.rooms.remove(appointment)
+
+                    job_id = f'email_notification_{user_id}_{appointment.id}'
+                    job = scheduler.get_job(job_id)
+                    if job:
+                        if job.next_run_time and job.next_run_time > datetime.now():  
+                            scheduler.remove_job(job_id)
+                        else:
+                            flash('The notification for this appointment is already sent or is currently running.', 'info')
+                appointment.available = True
+            
+            db.session.commit()
+            flash('Selected appointments have been removed.', 'success')
+        else:
+            flash('No appointments were selected.', 'warning')
+        
+        return redirect('/view-dashboard')
+    else:
+        flash('You need to log in to manage your appointments.', 'warning')
+        return redirect('/login')
