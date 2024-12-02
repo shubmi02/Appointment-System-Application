@@ -195,7 +195,7 @@ def confirmation():
                 )
 
 
-             # TESTING: Send the email after 30 seconds
+            # TESTING: Send the email after 30 seconds
             # recipient = user.email
             # subject = f"Room Booking Confirmation: {room.name}"
             # body = f"Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}."
@@ -240,6 +240,9 @@ def remove_appointments():
             for appointment in selected_appointments:
                 if appointment in user.rooms:
                     user.rooms.remove(appointment)
+                    job_id = f'email_notification_{user_id}_{appointment.id}'
+                    if scheduler.get_job(job_id):
+                        scheduler.remove_job(job_id)
                 appointment.available = True
             
             db.session.commit()
