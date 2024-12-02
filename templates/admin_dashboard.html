@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+
+    <h2>Users</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                <form action="/admin/delete-user/{{ user.id }}" method="POST">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Bookings</h2>
+    <table border="1">
+        <tr>
+            <th>Room</th>
+            <th>Time Slot</th>
+            <th>Booked By</th>
+        </tr>
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.name }}</td>
+            <td>{{ booking.time_slot }}</td>
+            <td>{{ booking.users[0].name if booking.users else 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Rooms</h2>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Time Slot</th>
+            <th>Available</th>
+        </tr>
+        {% for room in rooms %}
+        <tr>
+            <td>{{ room.name }}</td>
+            <td>{{ room.time_slot }}</td>
+            <td>{{ 'Yes' if room.available else 'No' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

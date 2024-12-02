@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, session, flash, url_for
+from flask import Flask, render_template, request, redirect, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_apscheduler import APScheduler
+from flask_migrate import Migrate
 from datetime import datetime, timedelta
 import pandas as pd
 
@@ -11,6 +12,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 db = SQLAlchemy(app)
 app.secret_key = 'secret_key'
+
+migrate = Migrate(app, db);
 
 # Mail Configurations
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
@@ -40,12 +43,14 @@ class User(db.Model):
     name = db.Column(db.String(200), nullable = False)
     email = db.Column(db.String(200), nullable = False, unique = True)
     password = db.Column(db.String(100))
+    is_admin = db.Column(db.Boolean, default=False)  # Admin flag
     rooms = db.relationship('Room', secondary=user_rooms, backref=db.backref('users', lazy=True))
 
-    def __init__(self, email, password, name):  
+    def __init__(self, email, password, name, is_admin=False):  
         self.name = name
         self.email = email
         self.password = password
+        self.is_admin = is_admin
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
@@ -79,6 +84,17 @@ with app.app_context():
     if not Room.query.first():  
         load_data()
 
+#default admin user for testing
+with app.app_context():
+    if not User.query.filter_by(email='admin@example.com').first():
+        admin_user = User(
+            name='Admin User',
+            email='admin@example.com',
+            password=generate_password_hash('admin123'),
+            is_admin=True
+        )
+        db.session.add(admin_user)
+        db.session.commit()
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -126,6 +142,7 @@ def register():
 
     return render_template('register.html')
 
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -139,13 +156,48 @@ def login():
             session['email'] = user.email
             session['user_id'] = user.id
             session['logged_in'] = True
+            session['is_admin'] = user.is_admin  # Store admin status in session
             
-            return redirect('/')
+            if user.is_admin:
+                return redirect('/admin-dashboard')  # Redirect admin users
+            else:
+                return redirect('/')
         else:
             flash("Invalid username or password", "danger")
-            return redirect(url_for('login'))
+            return redirect('login')
 
     return render_template('login.html')
+
+#admin dashboard route
+@app.route("/admin-dashboard")
+def admin_dashboard():
+    if 'logged_in' in session and session.get('is_admin'):
+        users = User.query.all()
+        bookings = Room.query.filter(Room.available == False).all()
+        rooms = Room.query.all()
+
+        return render_template(
+            'admin_dashboard.html',
+            users=users,
+            bookings=bookings,
+            rooms=rooms
+        )
+    else:
+        flash('Access denied: Admins only!', 'danger')
+        return redirect('/')
+    
+#admin actions
+@app.route("/admin/delete-user/<int:user_id>", methods=['POST'])
+def delete_user(user_id):
+    if 'logged_in' in session and session.get('is_admin'):
+        user = User.query.get_or_404(user_id)
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'User {user.name} deleted successfully.', 'success')
+        return redirect('/admin-dashboard')
+    else:
+        flash('Access denied: Admins only!', 'danger')
+        return redirect('/')
 
 
 @app.route('/logout')
@@ -176,37 +228,31 @@ def confirmation():
 
         # Schedule email notifications for each booked room
         for room in selected_rooms:
-            room_time = datetime.strptime(room.time_slot, "%H:%M")  # Parse the time slot (assuming "HH:MM" format)
-            today = datetime.now().date()
-            notification_time = datetime.combine(today, room_time.time()) - timedelta(minutes=5)  # 5 minutes before the time slot
-
-            # Ensure the notification is in the future
-            if notification_time > datetime.now():
-                scheduler.add_job(
-                    id=f'email_notification_{user_id}_{room.id}',  # Unique job ID
-                    func=send_email,
-                    trigger='date',
-                    run_date=notification_time,
-                    args=[
-                        user.email,
-                        f'Room Booking Confirmation: {room.name}',
-                        f'Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}.'  # Email body
-                    ]
-                )
-
-
-            # TESTING: Send the email after 30 seconds
-            # recipient = user.email
-            # subject = f"Room Booking Confirmation: {room.name}"
-            # body = f"Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}."
-            # send_time = datetime.now() + timedelta(seconds=30)
+            # notification_time = datetime.now() + timedelta(minutes=5)  # 5 minutes before room time slot
             # scheduler.add_job(
-            #     id=f'email_notification_{user_id}_{room.id}',  # Ensure the ID is unique
+            #     id=f'email_notification_{user_id}_{room.id}',
             #     func=send_email,
             #     trigger='date',
-            #     run_date=send_time,
-            #     args=[recipient, subject, body]
+            #     run_date=notification_time,
+            #     args=[
+            #         user.email,
+            #         'Room Booking Confirmation',
+            #         f'You have successfully booked {room.name} for the time slot {room.time_slot}.'
+            #     ]
             # )
+
+             # TESTING: Send the email after 30 seconds
+            recipient = user.email
+            subject = f"Room Booking Confirmation: {room.name}"
+            body = f"Dear {user.name},\n\nYou have successfully booked room {room.name} for the time slot {room.time_slot}."
+            send_time = datetime.now() + timedelta(seconds=30)
+            scheduler.add_job(
+                id=f'email_notification_{user_id}_{room.id}',  # Ensure the ID is unique
+                func=send_email,
+                trigger='date',
+                run_date=send_time,
+                args=[recipient, subject, body]
+            )
             # End
 
         flash('Booking confirmed! A notification will be sent shortly.', 'success')
@@ -226,31 +272,3 @@ def view_dashboard():
     bookings = user.rooms  # Assuming the relationship between User and Room is set up
 
     return render_template("view_dashboard.html", bookings=bookings)
-@app.route("/remove-appointments", methods=['POST'])
-def remove_appointments():
-    if 'logged_in' in session:
-        selected_appointment_ids = request.form.getlist('appointment_id')  
-        user_id = session.get('user_id')
-        user = User.query.get(user_id)
-
-        if selected_appointment_ids:
-            selected_appointment_ids = [int(appointment_id) for appointment_id in selected_appointment_ids]
-            selected_appointments = Room.query.filter(Room.id.in_(selected_appointment_ids)).all()
-            
-            for appointment in selected_appointments:
-                if appointment in user.rooms:
-                    user.rooms.remove(appointment)
-                    job_id = f'email_notification_{user_id}_{appointment.id}'
-                    if scheduler.get_job(job_id):
-                        scheduler.remove_job(job_id)
-                appointment.available = True
-            
-            db.session.commit()
-            flash('Selected appointments have been removed.', 'success')
-        else:
-            flash('No appointments were selected.', 'warning')
-        
-        return redirect('/view-dashboard')
-    else:
-        flash('You need to log in to manage your appointments.', 'warning')
-        return redirect('/login')
