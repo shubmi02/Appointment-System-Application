@@ -64,6 +64,17 @@ class Room(db.Model):
     name = db.Column(db.String, nullable=False)
     time_slot = db.Column(db.String, nullable=False)
     available = db.Column(db.Boolean, default=True)
+    
+    # New attributes for booking
+    booked_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    booked_by = db.relationship('User', backref='booked_rooms', lazy=True)
+    
+    # You can store time slot for each booking
+    booked_at = db.Column(db.String, nullable=True)  # This could store the exact time of booking
+    
+    def __repr__(self):
+        return f"<Room {self.name} (Available: {self.available})>"
+
 
 def load_data():
     df = pd.read_csv('room_availability.csv')
@@ -198,6 +209,114 @@ def delete_user(user_id):
     else:
         flash('Access denied: Admins only!', 'danger')
         return redirect('/')
+    
+# Delete booking
+@app.route('/admin/delete-booking/<int:room_id>', methods=['POST'])
+def delete_booking(room_id):
+    room = Room.query.get(room_id)
+    if room:
+        room.available = True  
+        room.booked_by_id = None  
+        room.booked_at = None  
+        db.session.commit()
+        flash('Booking deleted successfully', 'success')
+    else:
+        flash('Room not found', 'danger')
+    return redirect('/admin-dashboard')
+
+# Edit booking
+@app.route('/admin/edit-booking/<int:room_id>', methods=['GET', 'POST'])
+def edit_booking(room_id):
+    room = Room.query.get(room_id)
+    if room and not room.available:  # Check if the room is booked
+        if request.method == 'POST':
+            # Get the form data
+            user_id = request.form['user_id']
+            time_slot = request.form['time_slot']
+
+            user = User.query.get(user_id)
+
+            if user:
+                room.booked_by_id = user.id 
+                room.booked_at = time_slot   
+                room.available = False  
+
+                db.session.commit()
+
+                flash(f'Booking updated successfully for room {room.name}', 'success')
+                return redirect('/admin-dashboard')  
+            else:
+                flash('Invalid user selected', 'danger')
+                return redirect('/admin-dashboard')  
+        users = User.query.all()
+        return render_template('edit_booking.html', room=room, users=users)
+    else:
+        flash('Room not found or is not currently booked', 'danger')
+        return redirect('/admin-dashboard')
+
+# Delete room
+@app.route('/admin/delete-room/<int:room_id>', methods=['POST'])
+def delete_room(room_id):
+    room = Room.query.get(room_id)
+    if room:
+        db.session.delete(room)
+        db.session.commit()
+        flash('Room deleted successfully', 'success')
+    else:
+        flash('Room not found', 'danger')
+    return redirect('/admin/dashboard')
+
+# Edit room
+@app.route('/admin/edit-room/<int:room_id>', methods=['GET', 'POST'])
+def edit_room(room_id):
+    room = Room.query.get(room_id)
+    if request.method == 'POST':
+        room.name = request.form['name']
+        room.time_slot = request.form['time_slot']
+        room.available = bool(request.form.get('available', False))
+        db.session.commit()
+        flash('Room updated successfully', 'success')
+        return redirect('/admin/dashboard')
+    return render_template('edit_room.html', room=room)
+
+# Add new room
+@app.route('/admin/add-room', methods=['GET', 'POST'])
+def add_room():
+    if request.method == 'POST':
+        name = request.form['name']
+        time_slot = request.form['time_slot']
+        available = bool(request.form.get('available', False))
+        new_room = Room(name=name, time_slot=time_slot, available=available)
+        db.session.add(new_room)
+        db.session.commit()
+        flash('Room added successfully', 'success')
+        return redirect('/admin/dashboard')
+    return render_template('add_room.html')
+
+@app.route('/book-room/<int:room_id>', methods=['POST'])
+def book_room(room_id):
+    if 'logged_in' in session:
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+        room = Room.query.get(room_id)
+        time_slot = request.form['time_slot']
+
+        if room and room.available:
+            room.available = False  
+            room.booked_by_id = user.id  
+            room.booked_at = time_slot  
+            
+            # Save the booking
+            db.session.commit()
+
+            flash(f'Room {room.name} successfully booked!', 'success')
+            return redirect('/confirmation')  
+        else:
+            flash('This room is already booked or unavailable.', 'danger')
+            return redirect('/')  
+    else:
+        flash('You need to log in to book a room.', 'warning')
+        return redirect('/login')
 
 
 @app.route('/logout')
