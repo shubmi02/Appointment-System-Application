@@ -7,6 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
             text-align: center;
         }
 
@@ -39,7 +40,9 @@
 
         .time-label {
             font-weight: bold;
+            background-color: white;
         }
+        
         .select2-container .select2-selection--single {
             width: 100px; 
             height: 40px; 
@@ -53,6 +56,18 @@
         button {
             margin: 20px;
         }
+
+        /* Add a container to handle the button layout */
+        .button-container {
+            display: flex;
+            flex-direction: column;  /* Stack buttons vertically */
+            align-items: center;  /* Center the buttons */
+            position: absolute;  /* So they stay in the top-right corner */
+            top: 20px;
+            right: 20px;
+        }
+
+        /* Styling for the Logout button */
         .logout-button {
             background-color: #333;
             color: white;
@@ -63,12 +78,53 @@
             font-weight: bold;
             border-radius: 5px;
             transition: background-color 0.3s;
-            position: absolute;
-            top: 20px;
-            right: 20px;
         }
+
+        /* Hover effect for the Logout button */
         .logout-button:hover {
             background-color: #555;
+        }
+
+        /* Styling for the "View My Dashboard" button */
+        .btn-homepage {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-top: 10px;  /* Add space between the buttons */
+        }
+
+        /* Hover effect for the "View My Dashboard" button */
+        .btn-homepage:hover {
+            background-color: #555;
+        }
+
+        /* General button styles for Filter and Confirm Room buttons (same as Logout button) */
+        button, .btn-homepage, .logout-button {
+            background-color: #333;         /* Dark background color */
+            color: white;                   /* White text color */
+            border: none;                   /* No border */
+            padding: 10px 20px;             /* Padding inside the button */
+            cursor: pointer;               /* Pointer cursor on hover */
+            font-size: 1rem;                /* Font size */
+            font-weight: bold;              /* Bold text */
+            border-radius: 5px;             /* Rounded corners */
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transition for color and hover effect */
+            width: 175px;                   /* Same width for all buttons */
+            text-align: center;             /* Center text inside buttons */
+            text-decoration: underline;
+        }
+
+        /* Hover effect for buttons */
+        button:hover, .btn-homepage:hover, .logout-button:hover {
+            background-color: #555;         /* Slightly lighter background on hover */
+            transform: translateY(-2px);    /* Slight upward movement on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Shadow effect */
         }
         
     </style>
@@ -83,6 +139,8 @@
     <h1>Room Availability</h1>
     
     <a href="/logout" class="logout-button">Logout</a>
+    <a href="/view-dashboard" class="btn-homepage">View My Dashboard</a>
+
     <!-- Filter Form -->
 
     <form method="GET" action="/" onsubmit="return validateTime();">
