@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            flex-direction: column;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1200px;
+            backdrop-filter: blur(10px);
+        }
+
+        .dashboard-container h1, .dashboard-container h2 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        table, th, td {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-dark, .btn-light {
+            width: auto;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-dark {
+            color: #ffffff;
+            background-color: #f11414;
+        }
+
+        .btn-dark:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-light {
+            color: #333;
+            background-color: #ece509;
+        }
+
+        .btn-light:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Admin Dashboard</h1>
+
+        <h2>Users</h2>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <form action="/admin/delete-user/{{ user.id }}" method="POST">
+                        <button type="submit" class="btn btn-dark">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Bookings</h2>
+        <table>
+            <tr>
+                <th>Room</th>
+                <th>Time Slot</th>
+                <th>Booked By</th>
+                <th>Actions</th>
+            </tr>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.name }}</td>
+                <td>{{ booking.time_slot }}</td>
+                <td>{{ booking.users[0].name if booking.users else 'N/A' }}</td>
+                <td>
+                    <form action="/admin/delete-booking/{{ booking.id }}" method="POST">
+                        <button type="submit" class="btn btn-dark">Delete</button>
+                    </form>
+                    <form action="/admin/edit-booking/{{ booking.id }}" method="GET">
+                        <button type="submit" class="btn btn-light">Edit</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Rooms</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Time Slot</th>
+                <th>Available</th>
+                <th>Actions</th>
+            </tr>
+            {% for room in rooms %}
+            <tr>
+                <td>{{ room.name }}</td>
+                <td>{{ room.time_slot }}</td>
+                <td>{{ 'Yes' if room.available else 'No' }}</td>
+                <td>
+                    <form action="/admin/delete-room/{{ room.id }}" method="POST">
+                        <button type="submit" class="btn btn-dark">Delete</button>
+                    </form>
+                    <form action="/admin/edit-room/{{ room.id }}" method="GET">
+                        <button type="submit" class="btn btn-light">Edit</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <form action="/admin/add-room" method="GET" style="text-align: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-dark">Add New Room</button>
+        </form>
+    </div>
+</body>
+</html>
