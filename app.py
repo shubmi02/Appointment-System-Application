@@ -290,7 +290,7 @@ def add_room():
         db.session.add(new_room)
         db.session.commit()
         flash('Room added successfully', 'success')
-        return redirect('/admin/dashboard')
+        return redirect('/admin-dashboard')
     return render_template('add_room.html')
 
 @app.route('/book-room/<int:room_id>', methods=['POST'])
