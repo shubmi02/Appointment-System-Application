@@ -347,19 +347,6 @@ def confirmation():
 
         # Schedule email notifications for each booked room
         for room in selected_rooms:
-            # notification_time = datetime.now() + timedelta(minutes=5)  # 5 minutes before room time slot
-            # scheduler.add_job(
-            #     id=f'email_notification_{user_id}_{room.id}',
-            #     func=send_email,
-            #     trigger='date',
-            #     run_date=notification_time,
-            #     args=[
-            #         user.email,
-            #         'Room Booking Confirmation',
-            #         f'You have successfully booked {room.name} for the time slot {room.time_slot}.'
-            #     ]
-            # )
-
              # TESTING: Send the email after 30 seconds
             recipient = user.email
             subject = f"Room Booking Confirmation: {room.name}"
