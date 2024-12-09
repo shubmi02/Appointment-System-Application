@@ -266,7 +266,7 @@ def edit_booking(room_id):
         return redirect('/admin-dashboard')
 
 # Delete room
-@app.route('/admin/delete-room/<int:room_id>', methods=['POST'])
+@app.route('/admin/delete-room/<int:room_id>',  methods=['GET', 'POST'])
 def delete_room(room_id):
     room = Room.query.get(room_id)
     if room:
