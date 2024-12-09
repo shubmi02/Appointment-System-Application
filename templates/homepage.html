@@ -146,42 +146,43 @@
     <form method="GET" action="/" onsubmit="return validateTime();">
         <label for="start_time">Start Time:</label>
         <select id="start_time" name="start_time" required>
-            <option value="08:00">08:00 AM</option>
-            <option value="09:00">09:00 AM</option>
-            <option value="10:00">10:00 AM</option>
-            <option value="11:00">11:00 AM</option>
-            <option value="12:00">12:00 PM</option>
-            <option value="13:00">13:00 PM</option>
-            <option value="14:00">14:00 PM</option>
-            <option value="15:00">15:00 PM</option>
-            <option value="16:00">16:00 PM</option>
-            <option value="17:00">17:00 PM</option>
-            <option value="18:00">18:00 PM</option>
-            <option value="19:00">19:00 PM</option>
-            <option value="20:00">20:00 PM</option>
-            <option value="21:00">21:00 PM</option>
+            <option value="08:00" {% if request.args.get('start_time') == '08:00' %}selected{% endif %}>08:00 AM</option>
+            <option value="09:00" {% if request.args.get('start_time') == '09:00' %}selected{% endif %}>09:00 AM</option>
+            <option value="10:00" {% if request.args.get('start_time') == '10:00' %}selected{% endif %}>10:00 AM</option>
+            <option value="11:00" {% if request.args.get('start_time') == '11:00' %}selected{% endif %}>11:00 AM</option>
+            <option value="12:00" {% if request.args.get('start_time') == '12:00' %}selected{% endif %}>12:00 PM</option>
+            <option value="13:00" {% if request.args.get('start_time') == '13:00' %}selected{% endif %}>13:00 PM</option>
+            <option value="14:00" {% if request.args.get('start_time') == '14:00' %}selected{% endif %}>14:00 PM</option>
+            <option value="15:00" {% if request.args.get('start_time') == '15:00' %}selected{% endif %}>15:00 PM</option>
+            <option value="16:00" {% if request.args.get('start_time') == '16:00' %}selected{% endif %}>16:00 PM</option>
+            <option value="17:00" {% if request.args.get('start_time') == '17:00' %}selected{% endif %}>17:00 PM</option>
+            <option value="18:00" {% if request.args.get('start_time') == '18:00' %}selected{% endif %}>18:00 PM</option>
+            <option value="19:00" {% if request.args.get('start_time') == '19:00' %}selected{% endif %}>19:00 PM</option>
+            <option value="20:00" {% if request.args.get('start_time') == '20:00' %}selected{% endif %}>20:00 PM</option>
+            <option value="21:00" {% if request.args.get('start_time') == '21:00' %}selected{% endif %}>21:00 PM</option>
         </select>
     
         <label for="end_time">End Time:</label>
         <select id="end_time" name="end_time" required>
-            <option value="08:00">08:00 AM</option>
-            <option value="09:00">09:00 AM</option>
-            <option value="10:00">10:00 AM</option>
-            <option value="11:00">11:00 AM</option>
-            <option value="12:00">12:00 PM</option>
-            <option value="13:00">13:00 PM</option>
-            <option value="14:00">14:00 PM</option>
-            <option value="15:00">15:00 PM</option>
-            <option value="16:00">16:00 PM</option>
-            <option value="17:00">17:00 PM</option>
-            <option value="18:00">18:00 PM</option>
-            <option value="19:00">19:00 PM</option>
-            <option value="20:00">20:00 PM</option>
-            <option value="21:00">21:00 PM</option>
+            <option value="08:00" {% if request.args.get('end_time') == '08:00' %}selected{% endif %}>08:00 AM</option>
+            <option value="09:00" {% if request.args.get('end_time') == '09:00' %}selected{% endif %}>09:00 AM</option>
+            <option value="10:00" {% if request.args.get('end_time') == '10:00' %}selected{% endif %}>10:00 AM</option>
+            <option value="11:00" {% if request.args.get('end_time') == '11:00' %}selected{% endif %}>11:00 AM</option>
+            <option value="12:00" {% if request.args.get('end_time') == '12:00' %}selected{% endif %}>12:00 PM</option>
+            <option value="13:00" {% if request.args.get('end_time') == '13:00' %}selected{% endif %}>13:00 PM</option>
+            <option value="14:00" {% if request.args.get('end_time') == '14:00' %}selected{% endif %}>14:00 PM</option>
+            <option value="15:00" {% if request.args.get('end_time') == '15:00' %}selected{% endif %}>15:00 PM</option>
+            <option value="16:00" {% if request.args.get('end_time') == '16:00' %}selected{% endif %}>16:00 PM</option>
+            <option value="17:00" {% if request.args.get('end_time') == '17:00' %}selected{% endif %}>17:00 PM</option>
+            <option value="18:00" {% if request.args.get('end_time') == '18:00' %}selected{% endif %}>18:00 PM</option>
+            <option value="19:00" {% if request.args.get('end_time') == '19:00' %}selected{% endif %}>19:00 PM</option>
+            <option value="20:00" {% if request.args.get('end_time') == '20:00' %}selected{% endif %}>20:00 PM</option>
+            <option value="21:00" {% if request.args.get('end_time') == '21:00' %}selected{% endif %}>21:00 PM</option>
         </select>
     
         <button type="submit">Filter</button>
     </form>
+    
     
     <script>
         $(document).ready(function() {
