@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userdata.db'
 db = SQLAlchemy(app)
 app.secret_key = 'secret_key'
 
-migrate = Migrate(app, db);
+migrate = Migrate(app, db)
 
 # Mail Configurations
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
@@ -78,7 +78,6 @@ class Room(db.Model):
 
 def load_data():
     df = pd.read_csv('room_availability.csv')
-    
     for index, row in df.iterrows():
         room_name = row['Room']
         capacity = row['Capacity']  
@@ -88,6 +87,16 @@ def load_data():
             db.session.add(room)
     
     db.session.commit()
+
+
+def get_sorted_room_names():
+    # Fetch distinct room names from the database
+    rooms = Room.query.with_entities(Room.name).distinct().all()
+    room_names = [room.name for room in rooms]
+    
+    # Sort room names numerically
+    sorted_room_names = sorted(room_names, key=lambda x: int(''.join(filter(str.isdigit, x))))
+    return sorted_room_names
 
 
 with app.app_context():
@@ -129,6 +138,8 @@ def homepage():
                 room_availability[room.time_slot] = {}
             room_availability[room.time_slot][room.name] = {'available' : room.available,
                                                             'id' : room.id}
+            
+        room_names = get_sorted_room_names()
     
         return render_template('homepage.html', room_names=room_names, room_availability=room_availability)
     else:
