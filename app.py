@@ -268,14 +268,16 @@ def edit_booking(room_id):
 # Delete room
 @app.route('/admin/delete-room/<int:room_id>',  methods=['GET', 'POST'])
 def delete_room(room_id):
-    room = Room.query.get(room_id)
-    if room:
+   
+    if 'logged_in' in session and session.get('is_admin'):
+        room = Room.query.get(room_id)
         db.session.delete(room)
         db.session.commit()
         flash('Room deleted successfully', 'success')
     else:
         flash('Room not found', 'danger')
-    return redirect('/admin/dashboard')
+    return redirect('/admin-dashboard')
+    
 
 # Edit room
 @app.route('/admin/edit-room/<int:room_id>', methods=['GET', 'POST'])

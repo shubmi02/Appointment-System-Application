@@ -134,11 +134,11 @@
                 <td>{{ booking.users[0].name if booking.users else 'N/A' }}</td>
                 <td>
                     <form action="/admin/delete-booking/{{ booking.id }}" method="POST">
-                        <button type="submit" class="btn btn-dark">Delete</button>
+                        <button type="submit" class="btn btn-dark">Delete Booking</button>
                     </form>
-                    <form action="/admin/edit-booking/{{ booking.id }}" method="GET">
-                        <button type="submit" class="btn btn-light">Edit</button>
-                    </form>
+                    <!-- <form action="/admin/edit-booking/{{ booking.id }}" method="GET">
+                        <button type="submit" class="btn btn-light">Edit Booking</button>
+                    </form> -->
                 </td>
             </tr>
             {% endfor %}
@@ -159,11 +159,11 @@
                 <td>{{ 'Yes' if room.available else 'No' }}</td>
                 <td>
                     <form action="/admin/delete-room/{{ room.id }}" method="POST">
-                        <button type="submit" class="btn btn-dark">Delete</button>
+                        <button type="submit" class="btn btn-dark">Delete Room </button>
                     </form>
-                    <form action="/admin/edit-room/{{ room.id }}" method="GET">
-                        <button type="submit" class="btn btn-light">Edit</button>
-                    </form>
+                    <!-- <form action="/admin/edit-room/{{ room.id }}" method="GET">
+                        <button type="submit" class="btn btn-light">Edit Room</button>
+                    </form> -->
                 </td>
             </tr>
             {% endfor %}
